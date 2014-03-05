@@ -535,6 +535,39 @@
 
 #define LUA_UNSIGNED		unsigned LUA_INTEGER
 
+#if defined(LUA_NO_FLOAT)
+#undef LUA_NUMBER 
+#undef LUA_NUMBER_SCAN
+#undef LUA_NUMBER_FMT
+
+#define LUA_NUMBER		LUA_INTEGER
+#define LUA_NUMBER_SCAN		LUA_INTEGER_SCAN
+#define LUA_NUMBER_FMT		LUA_INTEGER_FMT
+
+#undef luai_numadd
+#undef luai_numsub
+#undef luai_nummul
+#undef luai_numdiv
+#undef luai_nummod
+#undef luai_numpow
+
+#define luai_numadd(L,a,b)	intop(+,a,b)
+#define luai_numsub(L,a,b)	intop(-,a,b)
+#define luai_nummul(L,a,b)	intop(*,a,b)
+#define luai_numdiv		luaV_div
+#define luai_nummod		luaV_mod
+#define luai_numpow(L,a,b)	luaV_pow(a,b)
+
+#undef l_floor
+#define l_floor(x)		(x)
+
+#undef lua_str2number
+#undef lua_number2str
+
+#define lua_str2number(s,p)	strtoll((s),(p),10)
+#define lua_number2str		lua_integer2str
+#endif
+
 /* }================================================================== */
 
 
