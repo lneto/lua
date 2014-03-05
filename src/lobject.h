@@ -188,11 +188,15 @@ typedef struct lua_TValue TValue;
 /* Macros to set values */
 #define settt_(o,t)	((o)->tt_=(t))
 
-#define setnvalue(obj,x) \
-  { TValue *io=(obj); val_(io).n=(x); settt_(io, LUA_TNUMFLT); }
-
 #define setivalue(obj,x) \
   { TValue *io=(obj); val_(io).i=(x); settt_(io, LUA_TNUMINT); }
+
+#if !defined(LUA_NO_FLOAT)
+#define setnvalue(obj,x) \
+  { TValue *io=(obj); val_(io).n=(x); settt_(io, LUA_TNUMFLT); }
+#else
+#define setnvalue	setivalue
+#endif
 
 #define setnilvalue(obj) settt_(obj, LUA_TNIL)
 
