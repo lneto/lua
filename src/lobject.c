@@ -84,15 +84,17 @@ static lua_Integer intarith (lua_State *L, int op, lua_Integer v1,
 }
 
 
-static lua_Number numarith (int op, lua_Number v1, lua_Number v2) {
+static lua_Number numarith (lua_State *L, int op, lua_Number v1,
+                                                  lua_Number v2) {
+  UNUSED(L);	/* to avoid warnings */
   switch (op) {
-    case LUA_OPADD: return luai_numadd(NULL, v1, v2);
-    case LUA_OPSUB: return luai_numsub(NULL, v1, v2);
-    case LUA_OPMUL: return luai_nummul(NULL, v1, v2);
-    case LUA_OPDIV: return luai_numdiv(NULL, v1, v2);
-    case LUA_OPMOD: return luai_nummod(NULL, v1, v2);
-    case LUA_OPPOW: return luai_numpow(NULL, v1, v2);
-    case LUA_OPUNM: return luai_numunm(NULL, v1);
+    case LUA_OPADD: return luai_numadd(L, v1, v2);
+    case LUA_OPSUB: return luai_numsub(L, v1, v2);
+    case LUA_OPMUL: return luai_nummul(L, v1, v2);
+    case LUA_OPDIV: return luai_numdiv(L, v1, v2);
+    case LUA_OPMOD: return luai_nummod(L, v1, v2);
+    case LUA_OPPOW: return luai_numpow(L, v1, v2);
+    case LUA_OPUNM: return luai_numunm(L, v1);
     default: lua_assert(0); return 0;
   }
 }
@@ -116,7 +118,7 @@ void luaO_arith (lua_State *L, int op, const TValue *p1, const TValue *p2,
       return;
     }
     else if (tonumber(p1, &n1) && tonumber(p2, &n2)) {
-      setnvalue(res, numarith(op, n1, n2));
+      setnvalue(res, numarith(L, op, n1, n2));
       return;
     }
     /* else go to the end */

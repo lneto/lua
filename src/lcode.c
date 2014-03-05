@@ -360,7 +360,9 @@ int luaK_intK (FuncState *fs, lua_Integer n) {
 */ 
 static int luaK_numberK (FuncState *fs, lua_Number r) {
   TValue o;
-  lua_assert(!luai_numisnan(NULL, r) && !isminuszero(r));
+  lua_State *L = fs->ls->L;
+  UNUSED(L);	/* to avoid warnings */
+  lua_assert(!luai_numisnan(fs->ls->L, r) && !isminuszero(r));
   setnvalue(&o, r);
   return addk(fs, &o, &o);
 }
@@ -746,9 +748,10 @@ void luaK_indexed (FuncState *fs, expdesc *t, expdesc *k) {
 }
 
 
-static int constfolding (OpCode op, expdesc *e1, expdesc *e2) {
+static int constfolding (FuncState *fs, OpCode op, expdesc *e1, expdesc *e2) {
   TValue v1, v2, res;
   lua_Integer i;
+  lua_State *L = fs->ls->L;
   if (!tonumeral(e1, &v1) || !tonumeral(e2, &v2))
     return 0;
   if (op == OP_IDIV &&
@@ -756,14 +759,14 @@ static int constfolding (OpCode op, expdesc *e1, expdesc *e2) {
     return 0;  /* avoid division by 0 and conversion errors */
   if (op == OP_MOD && ttisinteger(&v1) && ttisinteger(&v2) && ivalue(&v2) == 0)
     return 0;  /* avoid module by 0 at compile time */
-  luaO_arith(NULL, op - OP_ADD + LUA_OPADD, &v1, &v2, &res);
+  luaO_arith(L, op - OP_ADD + LUA_OPADD, &v1, &v2, &res);
   if (ttisinteger(&res)) {
     e1->k = VKINT;
     e1->u.ival = ivalue(&res);
   }
   else {
     lua_Number n = fltvalue(&res);
-    if (luai_numisnan(NULL, n) || isminuszero(n))
+    if (luai_numisnan(L, n) || isminuszero(n))
       return 0;  /* folds neither NaN nor -0 */
     e1->k = VKFLT;
     e1->u.nval = n;
@@ -774,7 +777,7 @@ static int constfolding (OpCode op, expdesc *e1, expdesc *e2) {
 
 static void codearith (FuncState *fs, OpCode op,
                        expdesc *e1, expdesc *e2, int line) {
-  if (!constfolding(op, e1, e2)) {  /* could not fold operation? */
+  if (!constfolding(fs, op, e1, e2)) {  /* could not fold operation? */
     int o2 = (op != OP_UNM && op != OP_LEN) ? luaK_exp2RK(fs, e2) : 0;
     int o1 = luaK_exp2RK(fs, e1);
     if (o1 > o2) {
@@ -813,7 +816,7 @@ void luaK_prefix (FuncState *fs, UnOpr op, expdesc *e, int line) {
   e2.t = e2.f = NO_JUMP; e2.k = VKFLT; e2.u.nval = 0;
   switch (op) {
     case OPR_MINUS: {
-      if (!constfolding(OP_UNM, e, e)) {  /* cannot fold it? */
+      if (!constfolding(fs, OP_UNM, e, e)) {  /* cannot fold it? */
         luaK_exp2anyreg(fs, e);
         codearith(fs, OP_UNM, e, &e2, line);
       }
