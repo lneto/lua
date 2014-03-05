@@ -754,7 +754,11 @@ static int constfolding (FuncState *fs, OpCode op, expdesc *e1, expdesc *e2) {
   lua_State *L = fs->ls->L;
   if (!tonumeral(e1, &v1) || !tonumeral(e2, &v2))
     return 0;
+#if !defined(LUA_NO_FLOAT)
   if (op == OP_IDIV &&
+#else
+  if ((op == OP_IDIV || op == OP_DIV) &&
+#endif
         (!tointeger(&v1, &i) || !tointeger(&v2, &i) || i == 0))
     return 0;  /* avoid division by 0 and conversion errors */
   if (op == OP_MOD && ttisinteger(&v1) && ttisinteger(&v2) && ivalue(&v2) == 0)
