@@ -82,6 +82,7 @@ static const Node dummynode_ = {
 };
 
 
+#if !defined(LUA_NO_FLOAT)
 /*
 ** hash for floating-point numbers
 */
@@ -96,6 +97,7 @@ static Node *hashfloat (const Table *t, lua_Number n) {
   }
   return hashmod(t, i);
 }
+#endif
 
 
 
@@ -107,8 +109,10 @@ static Node *mainposition (const Table *t, const TValue *key) {
   switch (ttype(key)) {
     case LUA_TNUMINT:
       return hashint(t, ivalue(key));
+#if !defined(LUA_NO_FLOAT)
     case LUA_TNUMFLT:
       return hashfloat(t, fltvalue(key));
+#endif
     case LUA_TSHRSTR:
       return hashstr(t, rawtsvalue(key));
     case LUA_TLNGSTR: {
