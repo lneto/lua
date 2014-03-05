@@ -5,7 +5,6 @@
 */
 
 
-#include <math.h>
 #include <stdlib.h>
 
 #define lcode_c

@@ -154,7 +154,7 @@ static int isneg (const char **s) {
 #endif
 
 
-#if !defined(lua_strx2number)
+#if !defined(lua_strx2number) && !defined(LUA_NO_FLOAT)
 
 #include <math.h>
 

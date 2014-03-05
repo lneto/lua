@@ -5,7 +5,6 @@
 */
 
 
-#include <math.h>
 #include <stdarg.h>
 #include <string.h>
 
@@ -379,6 +378,7 @@ LUA_API lua_Unsigned lua_tounsignedx (lua_State *L, int idx, int *pisnum) {
       isnum = 1;
       break;
     }
+#if !defined(LUA_NO_FLOAT)
     case LUA_TNUMFLT: {
       const lua_Number twop = (~(lua_Unsigned)0) + cast_num(1);
       lua_Number n = fltvalue(o);
@@ -396,6 +396,7 @@ LUA_API lua_Unsigned lua_tounsignedx (lua_State *L, int idx, int *pisnum) {
       isnum = 1;
       break;
     }
+#endif
     default: break;
   }
   if (pisnum) *pisnum = isnum;
