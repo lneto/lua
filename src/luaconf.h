@@ -479,7 +479,7 @@
 */
 
 /* the following operations need the math library */
-#if defined(lobject_c) || defined(lvm_c)
+#if !defined(LUA_NO_FLOAT) && (defined(lapi_c) || defined(lobject_c) || defined(lvm_c))
 #include <math.h>
 #define luai_nummod(L,a,b)	((a) - l_floor((a)/(b))*(b))
 #define luai_numpow(L,a,b)	(l_mathop(pow)(a,b))
@@ -544,12 +544,11 @@
 #define LUA_NUMBER_SCAN		LUA_INTEGER_SCAN
 #define LUA_NUMBER_FMT		LUA_INTEGER_FMT
 
+#if defined(LUA_CORE)
 #undef luai_numadd
 #undef luai_numsub
 #undef luai_nummul
 #undef luai_numdiv
-#undef luai_nummod
-#undef luai_numpow
 
 #define luai_numadd(L,a,b)	intop(+,a,b)
 #define luai_numsub(L,a,b)	intop(-,a,b)
@@ -557,6 +556,7 @@
 #define luai_numdiv		luaV_div
 #define luai_nummod		luaV_mod
 #define luai_numpow(L,a,b)	luaV_pow(a,b)
+#endif
 
 #undef l_floor
 #define l_floor(x)		(x)
