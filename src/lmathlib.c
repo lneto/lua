@@ -4,7 +4,7 @@
 ** See Copyright Notice in lua.h
 */
 
-
+#if !defined(LUA_NO_FLOAT)
 #include <stdlib.h>
 #include <math.h>
 
@@ -306,4 +306,5 @@ LUAMOD_API int luaopen_math (lua_State *L) {
   lua_setfield(L, -2, "huge");
   return 1;
 }
+#endif
 
