@@ -76,7 +76,7 @@ int luaV_tostring (lua_State *L, StkId obj) {
 ** This function is called only when 'n' has an integer value.
 */
 int luaV_numtointeger (lua_Number n, lua_Integer *p) {
-  if (cast_num(MIN_INTEGER) <= n && n < (MAX_INTEGER + cast_num(1))) {
+  if (cast_num(MIN_INTEGER) <= n && (n - cast_num(1)) < MAX_INTEGER) {
     *p = cast_integer(n);
     lua_assert(cast_num(*p) == n);
     return 1;
