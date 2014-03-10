@@ -479,7 +479,8 @@
 */
 
 /* the following operations need the math library */
-#if !defined(LUA_NO_FLOAT) && (defined(lapi_c) || defined(lobject_c) || defined(lvm_c))
+#if !defined(LUA_NO_FLOAT) && (defined(lapi_c) || defined(lobject_c) || \
+     defined(ltable_c) || defined(lvm_c))
 #include <math.h>
 #define luai_nummod(L,a,b)	((a) - l_floor((a)/(b))*(b))
 #define luai_numpow(L,a,b)	(l_mathop(pow)(a,b))
