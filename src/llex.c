@@ -186,6 +186,7 @@ static int check_next (LexState *ls, const char *set) {
 }
 
 
+#if !defined(LUA_NO_FLOAT)
 /*
 ** change all characters 'from' in buffer to 'to'
 */
@@ -260,6 +261,25 @@ static int read_numeral (LexState *ls, SemInfo *seminfo, int isf) {
     return TK_FLT;
   }
 }
+
+#else
+
+static int read_numeral (LexState *ls, SemInfo *seminfo, int isf) {
+  UNUSED(isf);
+  lua_assert(lisdigit(ls->current));
+  save_and_next(ls);
+  for (;;) {
+    if (lisxdigit(ls->current))
+      save_and_next(ls);
+    else break;
+  }
+  save(ls, '\0');
+  if (!luaO_str2int(luaZ_buffer(ls->buff), luaZ_bufflen(ls->buff) - 1,
+                    &seminfo->i))
+    lexerror(ls, "malformed number", TK_INT);
+  return TK_INT;
+}
+#endif
 
 
 /*
@@ -491,8 +511,12 @@ static int llex (LexState *ls, SemInfo *seminfo) {
             return TK_DOTS;   /* '...' */
           else return TK_CONCAT;   /* '..' */
         }
+#if !defined(LUA_NO_FLOAT)
         else if (!lisdigit(ls->current)) return '.';
         else return read_numeral(ls, seminfo, 1);
+#else
+        else return '.';
+#endif
       }
       case '0': case '1': case '2': case '3': case '4':
       case '5': case '6': case '7': case '8': case '9': {

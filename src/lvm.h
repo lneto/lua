@@ -15,11 +15,15 @@
 
 #define tostring(L,o) (ttisstring(o) || (luaV_tostring(L, o)))
 
-#define tonumber(o,n) \
-	(ttisfloat(o) ? (*(n) = fltvalue(o), 1) : luaV_tonumber_(o,n))
-
 #define tointeger(o,i) \
 	(ttisinteger(o) ? (*(i) = ivalue(o), 1) : luaV_tointeger_(o,i))
+
+#if !defined(LUA_NO_FLOAT)
+#define tonumber(o,n) \
+	(ttisfloat(o) ? (*(n) = fltvalue(o), 1) : luaV_tonumber_(o,n))
+#else
+#define tonumber	tointeger
+#endif
 
 #define intop(op,v1,v2) \
 	cast_integer(cast_unsigned(v1) op cast_unsigned(v2))

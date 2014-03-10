@@ -563,9 +563,6 @@
 
 #undef lua_str2number
 #undef lua_number2str
-
-#define lua_str2number(s,p)	strtoll((s),(p),10)
-#define lua_number2str		lua_integer2str
 #endif
 
 /* }================================================================== */

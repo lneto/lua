@@ -36,6 +36,7 @@
 #define MAXNUMBER2STR	50
 
 
+#if !defined(LUA_NO_FLOAT)
 int luaV_tonumber_ (const TValue *obj, lua_Number *n) {
   lua_assert(!ttisfloat(obj));
   if (ttisinteger(obj)) {
@@ -45,6 +46,7 @@ int luaV_tonumber_ (const TValue *obj, lua_Number *n) {
   else
     return (ttisstring(obj) && luaO_str2d(svalue(obj), tsvalue(obj)->len, n));
 }
+#endif
 
 
 int luaV_tostring (lua_State *L, StkId obj) {
@@ -53,6 +55,7 @@ int luaV_tostring (lua_State *L, StkId obj) {
   else {
     char buff[MAXNUMBER2STR];
     size_t len;
+#if !defined(LUA_NO_FLOAT)
     if (ttisinteger(obj))
       len = lua_integer2str(buff, ivalue(obj));
     else {
@@ -63,6 +66,9 @@ int luaV_tostring (lua_State *L, StkId obj) {
         buff[len] = '\0';
       }
     }
+#else
+    len = lua_integer2str(buff, ivalue(obj));
+#endif
     setsvalue2s(L, obj, luaS_newlstr(L, buff, len));
     return 1;
   }

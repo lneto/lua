@@ -142,6 +142,7 @@ static int isneg (const char **s) {
 }
 
 
+#if !defined(LUA_NO_FLOAT)
 /*
 ** lua_strx2number converts an hexadecimal numeric string to a number.
 ** In C99, 'strtod' does both conversions. C89, however, has no function
@@ -154,7 +155,7 @@ static int isneg (const char **s) {
 #endif
 
 
-#if !defined(lua_strx2number) && !defined(LUA_NO_FLOAT)
+#if !defined(lua_strx2number)
 
 #include <math.h>
 
@@ -236,6 +237,7 @@ int luaO_str2d (const char *s, size_t len, lua_Number *result) {
   while (lisspace(cast_uchar(*endptr))) endptr++;
   return (endptr == s + len);  /* OK if no trailing characters */
 }
+#endif
 
 
 int luaO_str2int (const char *s, size_t len, lua_Integer *result) {

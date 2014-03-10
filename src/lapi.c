@@ -336,9 +336,11 @@ LUA_API int lua_strtonum (lua_State *L, const char *s, size_t len) {
   if (luaO_str2int(s, len, &i)) {  /* try as an integer */
     setivalue(L->top, i);
   }
+#if !defined(LUA_NO_FLOAT)
   else if (luaO_str2d(s, len, &n)) {  /* else try as a float */
     setnvalue(L->top, n);
   }
+#endif
   else
     return 0;  /* conversion failed */
   api_incr_top(L);
