@@ -84,6 +84,7 @@ static lua_Integer intarith (lua_State *L, int op, lua_Integer v1,
 }
 
 
+#if !defined(LUA_NO_FLOAT)
 static lua_Number numarith (lua_State *L, int op, lua_Number v1,
                                                   lua_Number v2) {
   UNUSED(L);	/* to avoid warnings */
@@ -98,6 +99,7 @@ static lua_Number numarith (lua_State *L, int op, lua_Number v1,
     default: lua_assert(0); return 0;
   }
 }
+#endif
 
 
 void luaO_arith (lua_State *L, int op, const TValue *p1, const TValue *p2,
@@ -111,16 +113,20 @@ void luaO_arith (lua_State *L, int op, const TValue *p1, const TValue *p2,
     /* else go to the end */
   }
   else {  /* other operations */
+#if !defined(LUA_NO_FLOAT)
     lua_Number n1; lua_Number n2;
+#endif
     if (ttisinteger(p1) && ttisinteger(p2) && op != LUA_OPDIV &&
         (op != LUA_OPPOW || ivalue(p2) >= 0)) {
       setivalue(res, intarith(L, op, ivalue(p1), ivalue(p2)));
       return;
     }
+#if !defined(LUA_NO_FLOAT)
     else if (tonumber(p1, &n1) && tonumber(p2, &n2)) {
       setnvalue(res, numarith(L, op, n1, n2));
       return;
     }
+#endif
     /* else go to the end */
   }
   /* could not perform raw operation; try metmethod */

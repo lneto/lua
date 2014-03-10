@@ -332,7 +332,10 @@ LUA_API int lua_compare (lua_State *L, int index1, int index2, int op) {
 
 
 LUA_API int lua_strtonum (lua_State *L, const char *s, size_t len) {
-  lua_Integer i; lua_Number n;
+  lua_Integer i;
+#if !defined(LUA_NO_FLOAT)
+  lua_Number n;
+#endif
   if (luaO_str2int(s, len, &i)) {  /* try as an integer */
     setivalue(L->top, i);
   }
