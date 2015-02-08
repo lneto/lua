@@ -1,5 +1,5 @@
 /*
-** $Id: ltm.h,v 2.16 2013/04/29 16:56:50 roberto Exp $
+** $Id: ltm.h,v 2.21 2014/10/25 11:50:46 roberto Exp $
 ** Tag methods
 ** See Copyright Notice in lua.h
 */
@@ -13,7 +13,7 @@
 
 /*
 * WARNING: if you change the order of this enumeration,
-* grep "ORDER TM"
+* grep "ORDER TM" and "ORDER OP"
 */
 typedef enum {
   TM_INDEX,
@@ -21,15 +21,21 @@ typedef enum {
   TM_GC,
   TM_MODE,
   TM_LEN,
-  TM_EQ,  /* last tag method with `fast' access */
+  TM_EQ,  /* last tag method with fast access */
   TM_ADD,
   TM_SUB,
   TM_MUL,
-  TM_DIV,
-  TM_IDIV,
   TM_MOD,
   TM_POW,
+  TM_DIV,
+  TM_IDIV,
+  TM_BAND,
+  TM_BOR,
+  TM_BXOR,
+  TM_SHL,
+  TM_SHR,
   TM_UNM,
+  TM_BNOT,
   TM_LT,
   TM_LE,
   TM_CONCAT,
@@ -61,7 +67,6 @@ LUAI_FUNC int luaT_callbinTM (lua_State *L, const TValue *p1, const TValue *p2,
                               StkId res, TMS event);
 LUAI_FUNC void luaT_trybinTM (lua_State *L, const TValue *p1, const TValue *p2,
                               StkId res, TMS event);
-LUAI_FUNC const TValue *luaT_getequalTM (lua_State *L, Table *mt1, Table *mt2);
 LUAI_FUNC int luaT_callorderTM (lua_State *L, const TValue *p1,
                                 const TValue *p2, TMS event);
 

@@ -1,5 +1,5 @@
 /*
-** $Id: lparser.h,v 1.71 2013/04/16 18:46:28 roberto Exp $
+** $Id: lparser.h,v 1.74 2014/10/25 11:50:46 roberto Exp $
 ** Lua Parser
 ** See Copyright Notice in lua.h
 */
@@ -21,7 +21,7 @@ typedef enum {
   VNIL,
   VTRUE,
   VFALSE,
-  VK,		/* info = index of constant in `k' */
+  VK,		/* info = index of constant in 'k' */
   VKFLT,	/* nval = numerical float value */
   VKINT,	/* nval = numerical integer value */
   VNONRELOC,	/* info = result register */
@@ -50,8 +50,8 @@ typedef struct expdesc {
     lua_Number nval;  /* for VKFLT */
     lua_Integer ival;    /* for VKINT */
   } u;
-  int t;  /* patch list of `exit when true' */
-  int f;  /* patch list of `exit when false' */
+  int t;  /* patch list of 'exit when true' */
+  int f;  /* patch list of 'exit when false' */
 } expdesc;
 
 
@@ -97,15 +97,14 @@ struct BlockCnt;  /* defined in lparser.c */
 /* state needed to generate code for a given function */
 typedef struct FuncState {
   Proto *f;  /* current function header */
-  Table *h;  /* table to find (and reuse) elements in `k' */
   struct FuncState *prev;  /* enclosing function */
   struct LexState *ls;  /* lexical state */
   struct BlockCnt *bl;  /* chain of current blocks */
-  int pc;  /* next position to code (equivalent to `ncode') */
+  int pc;  /* next position to code (equivalent to 'ncode') */
   int lasttarget;   /* 'label' of last 'jump label' */
-  int jpc;  /* list of pending jumps to `pc' */
-  int nk;  /* number of elements in `k' */
-  int np;  /* number of elements in `p' */
+  int jpc;  /* list of pending jumps to 'pc' */
+  int nk;  /* number of elements in 'k' */
+  int np;  /* number of elements in 'p' */
   int firstlocal;  /* index of first local var (in Dyndata array) */
   short nlocvars;  /* number of elements in 'f->locvars' */
   lu_byte nactvar;  /* number of active local variables */
@@ -114,8 +113,8 @@ typedef struct FuncState {
 } FuncState;
 
 
-LUAI_FUNC Closure *luaY_parser (lua_State *L, ZIO *z, Mbuffer *buff,
-                                Dyndata *dyd, const char *name, int firstchar);
+LUAI_FUNC LClosure *luaY_parser (lua_State *L, ZIO *z, Mbuffer *buff,
+                                 Dyndata *dyd, const char *name, int firstchar);
 
 
 #endif

@@ -1,14 +1,16 @@
 /*
-** $Id: ltm.c,v 2.20 2013/05/06 17:19:11 roberto Exp $
+** $Id: ltm.c,v 2.33 2014/11/21 12:15:57 roberto Exp $
 ** Tag methods
 ** See Copyright Notice in lua.h
 */
 
-
-#include <string.h>
-
 #define ltm_c
 #define LUA_CORE
+
+#include "lprefix.h"
+
+
+#include <string.h>
 
 #include "lua.h"
 
@@ -28,7 +30,7 @@ LUAI_DDEF const char *const luaT_typenames_[LUA_TOTALTAGS] = {
   "no value",
   "nil", "boolean", udatatypename, "number",
   "string", "table", "function", udatatypename, "thread",
-  "proto", "upval"  /* these last two cases are used for tests only */
+  "proto" /* this last case is used for tests only */
 };
 
 
@@ -36,14 +38,16 @@ void luaT_init (lua_State *L) {
   static const char *const luaT_eventname[] = {  /* ORDER TM */
     "__index", "__newindex",
     "__gc", "__mode", "__len", "__eq",
-    "__add", "__sub", "__mul", "__div", "__idiv", "__mod",
-    "__pow", "__unm", "__lt", "__le",
+    "__add", "__sub", "__mul", "__mod", "__pow",
+    "__div", "__idiv",
+    "__band", "__bor", "__bxor", "__shl", "__shr",
+    "__unm", "__bnot", "__lt", "__le",
     "__concat", "__call"
   };
   int i;
   for (i=0; i<TM_N; i++) {
     G(L)->tmname[i] = luaS_new(L, luaT_eventname[i]);
-    luaS_fix(G(L)->tmname[i]);  /* never collect these names */
+    luaC_fix(L, obj2gco(G(L)->tmname[i]));  /* never collect these names */
   }
 }
 
@@ -82,7 +86,7 @@ const TValue *luaT_gettmbyobj (lua_State *L, const TValue *o, TMS event) {
 void luaT_callTM (lua_State *L, const TValue *f, const TValue *p1,
                   const TValue *p2, TValue *p3, int hasres) {
   ptrdiff_t result = savestack(L, p3);
-  setobj2s(L, L->top++, f);  /* push function */
+  setobj2s(L, L->top++, f);  /* push function (assume EXTRA_STACK) */
   setobj2s(L, L->top++, p1);  /* 1st argument */
   setobj2s(L, L->top++, p2);  /* 2nd argument */
   if (!hasres)  /* no result? 'p3' is third argument */
@@ -110,26 +114,22 @@ int luaT_callbinTM (lua_State *L, const TValue *p1, const TValue *p2,
 void luaT_trybinTM (lua_State *L, const TValue *p1, const TValue *p2,
                     StkId res, TMS event) {
   if (!luaT_callbinTM(L, p1, p2, res, event)) {
-    if (event == TM_CONCAT)
-      luaG_concaterror(L, p1, p2);
-    else if (event == TM_IDIV && ttisnumber(p1) && ttisnumber(p2))
-      luaG_tointerror(L, p1, p2);
-    else
-      luaG_aritherror(L, p1, p2);
+    switch (event) {
+      case TM_CONCAT:
+        luaG_concaterror(L, p1, p2);
+      case TM_BAND: case TM_BOR: case TM_BXOR:
+      case TM_SHL: case TM_SHR: case TM_BNOT: {
+        lua_Number dummy;
+        if (tonumber(p1, &dummy) && tonumber(p2, &dummy))
+          luaG_tointerror(L, p1, p2);
+        else
+          luaG_opinterror(L, p1, p2, "perform bitwise operation on");
+        /* else go through */
+      }
+      default:
+        luaG_opinterror(L, p1, p2, "perform arithmetic on");
+    }
   }
-}
-
-
-const TValue *luaT_getequalTM (lua_State *L, Table *mt1, Table *mt2) {
-  const TValue *tm1 = fasttm(L, mt1, TM_EQ);
-  const TValue *tm2;
-  if (tm1 == NULL) return NULL;  /* no metamethod */
-  if (mt1 == mt2) return tm1;  /* same metatables => same metamethods */
-  tm2 = fasttm(L, mt2, TM_EQ);
-  if (tm2 == NULL) return NULL;  /* no metamethod */
-  if (luaV_rawequalobj(tm1, tm2))  /* same metamethods? */
-    return tm1;
-  return NULL;
 }
 
 
