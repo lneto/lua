@@ -132,9 +132,11 @@ static void LoadConstants (LoadState *S, Proto *f) {
     case LUA_TBOOLEAN:
       setbvalue(o, LoadByte(S));
       break;
+#if !defined(LUA_NO_FLOAT)
     case LUA_TNUMFLT:
       setfltvalue(o, LoadNumber(S));
       break;
+#endif
     case LUA_TNUMINT:
       setivalue(o, LoadInteger(S));
       break;

@@ -100,6 +100,7 @@ static lua_Integer intarith (lua_State *L, int op, lua_Integer v1,
 }
 
 
+#if !defined(LUA_NO_FLOAT)
 static lua_Number numarith (lua_State *L, int op, lua_Number v1,
                                                   lua_Number v2) {
   switch (op) {
@@ -118,6 +119,7 @@ static lua_Number numarith (lua_State *L, int op, lua_Number v1,
     default: lua_assert(0); return 0;
   }
 }
+#endif
 
 
 void luaO_arith (lua_State *L, int op, const TValue *p1, const TValue *p2,
@@ -133,6 +135,7 @@ void luaO_arith (lua_State *L, int op, const TValue *p1, const TValue *p2,
       }
       else break;  /* go to the end */
     }
+#if !defined(LUA_NO_FLOAT)
     case LUA_OPDIV: case LUA_OPPOW: {  /* operate only on floats */
       lua_Number n1; lua_Number n2;
       if (tonumber(p1, &n1) && tonumber(p2, &n2)) {
@@ -141,7 +144,9 @@ void luaO_arith (lua_State *L, int op, const TValue *p1, const TValue *p2,
       }
       else break;  /* go to the end */
     }
+#endif
     default: {  /* other operations */
+#if !defined(LUA_NO_FLOAT)
       lua_Number n1; lua_Number n2;
       if (ttisinteger(p1) && ttisinteger(p2)) {
         setivalue(res, intarith(L, op, ivalue(p1), ivalue(p2)));
@@ -151,6 +156,13 @@ void luaO_arith (lua_State *L, int op, const TValue *p1, const TValue *p2,
         setfltvalue(res, numarith(L, op, n1, n2));
         return;
       }
+#else
+      lua_Integer i1; lua_Integer i2;
+      if (tointeger(p1, &i1) && tointeger(p2, &i2)) {
+        setivalue(res, intarith(L, op, i1, i2));
+        return;
+      }
+#endif
       else break;  /* go to the end */
     }
   }
@@ -174,6 +186,7 @@ static int isneg (const char **s) {
 
 
 
+#if !defined(LUA_NO_FLOAT)
 /*
 ** {==================================================================
 ** Lua's implementation for 'lua_strx2number'
@@ -255,6 +268,7 @@ static const char *l_str2d (const char *s, lua_Number *result) {
   while (lisspace(cast_uchar(*endptr))) endptr++;
   return (*endptr == '\0' ? endptr : NULL);  /* OK if no trailing characters */
 }
+#endif
 
 
 static const char *l_str2int (const char *s, lua_Integer *result) {
@@ -287,14 +301,20 @@ static const char *l_str2int (const char *s, lua_Integer *result) {
 
 
 size_t luaO_str2num (const char *s, TValue *o) {
+#if !defined(LUA_NO_FLOAT)
   lua_Integer i; lua_Number n;
+#else
+  lua_Integer i;
+#endif
   const char *e;
   if ((e = l_str2int(s, &i)) != NULL) {  /* try as an integer */
     setivalue(o, i);
   }
+#if !defined(LUA_NO_FLOAT)
   else if ((e = l_str2d(s, &n)) != NULL) {  /* else try as a float */
     setfltvalue(o, n);
   }
+#endif
   else
     return 0;  /* conversion failed */
   return (e - s) + 1;  /* success; return string size */
@@ -330,6 +350,7 @@ void luaO_tostring (lua_State *L, StkId obj) {
   char buff[MAXNUMBER2STR];
   size_t len;
   lua_assert(ttisnumber(obj));
+#if !defined(LUA_NO_FLOAT)
   if (ttisinteger(obj))
     len = lua_integer2str(buff, sizeof(buff), ivalue(obj));
   else {
@@ -341,6 +362,10 @@ void luaO_tostring (lua_State *L, StkId obj) {
     }
 #endif
   }
+#else
+  lua_assert(ttisinteger(obj));
+  len = lua_integer2str(buff, sizeof(buff), ivalue(obj));
+#endif
   setsvalue2s(L, obj, luaS_newlstr(L, buff, len));
 }
 
@@ -380,10 +405,12 @@ const char *luaO_pushvfstring (lua_State *L, const char *fmt, va_list argp) {
       }
       case 'I': {
         setivalue(L->top, cast(lua_Integer, va_arg(argp, l_uacInt)));
+#if !defined(LUA_NO_FLOAT)
         goto top2str;
       }
       case 'f': {
         setfltvalue(L->top, cast_num(va_arg(argp, l_uacNumber)));
+#endif
       top2str:
         luaD_inctop(L);
         luaO_tostring(L, L->top - 1);

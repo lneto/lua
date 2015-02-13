@@ -38,8 +38,13 @@ void luaT_init (lua_State *L) {
   static const char *const luaT_eventname[] = {  /* ORDER TM */
     "__index", "__newindex",
     "__gc", "__mode", "__len", "__eq",
+#if !defined(LUA_NO_FLOAT)
     "__add", "__sub", "__mul", "__mod", "__pow",
     "__div", "__idiv",
+#else
+    "__add", "__sub", "__mul", "__mod",
+    "__idiv",
+#endif
     "__band", "__bor", "__bxor", "__shl", "__shr",
     "__unm", "__bnot", "__lt", "__le",
     "__concat", "__call"

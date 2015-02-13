@@ -24,8 +24,12 @@
 ** grep "ORDER OPR" if you change these enums  (ORDER OP)
 */
 typedef enum BinOpr {
+#if !defined(LUA_NO_FLOAT)
   OPR_ADD, OPR_SUB, OPR_MUL, OPR_MOD, OPR_POW,
   OPR_DIV,
+#else
+  OPR_ADD, OPR_SUB, OPR_MUL, OPR_MOD,
+#endif
   OPR_IDIV,
   OPR_BAND, OPR_BOR, OPR_BXOR,
   OPR_SHL, OPR_SHR,

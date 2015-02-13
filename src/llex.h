@@ -33,7 +33,11 @@ enum RESERVED {
   TK_IDIV, TK_CONCAT, TK_DOTS, TK_EQ, TK_GE, TK_LE, TK_NE,
   TK_SHL, TK_SHR,
   TK_DBCOLON, TK_EOS,
+#if !defined(LUA_NO_FLOAT)
   TK_FLT, TK_INT, TK_NAME, TK_STRING
+#else
+  TK_INT, TK_NAME, TK_STRING
+#endif
 };
 
 /* number of reserved words */

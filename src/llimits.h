@@ -65,8 +65,10 @@ typedef unsigned char lu_byte;
 typedef LUAI_USER_ALIGNMENT_T L_Umaxalign;
 #else
 typedef union {
+#if !defined(LUA_NO_FLOAT)
   lua_Number n;
   double u;
+#endif
   void *s;
   lua_Integer i;
   long l;
@@ -76,7 +78,9 @@ typedef union {
 
 
 /* types of 'usual argument conversions' for lua_Number and lua_Integer */
+#if !defined(LUA_NO_FLOAT)
 typedef LUAI_UACNUMBER l_uacNumber;
+#endif
 typedef LUAI_UACINT l_uacInt;
 
 

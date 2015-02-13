@@ -926,11 +926,13 @@ static void simpleexp (LexState *ls, expdesc *v) {
   /* simpleexp -> FLT | INT | STRING | NIL | TRUE | FALSE | ... |
                   constructor | FUNCTION body | suffixedexp */
   switch (ls->t.token) {
+#if !defined(LUA_NO_FLOAT)
     case TK_FLT: {
       init_exp(v, VKFLT, 0);
       v->u.nval = ls->t.seminfo.r;
       break;
     }
+#endif
     case TK_INT: {
       init_exp(v, VKINT, 0);
       v->u.ival = ls->t.seminfo.i;
@@ -995,8 +997,12 @@ static BinOpr getbinopr (int op) {
     case '-': return OPR_SUB;
     case '*': return OPR_MUL;
     case '%': return OPR_MOD;
+#if !defined(LUA_NO_FLOAT)
     case '^': return OPR_POW;
     case '/': return OPR_DIV;
+#else
+    case '/': return OPR_IDIV;
+#endif
     case TK_IDIV: return OPR_IDIV;
     case '&': return OPR_BAND;
     case '|': return OPR_BOR;

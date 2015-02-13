@@ -108,9 +108,11 @@ static void DumpConstants (const Proto *f, DumpState *D) {
     case LUA_TBOOLEAN:
       DumpByte(bvalue(o), D);
       break;
+#if !defined(LUA_NO_FLOAT)
     case LUA_TNUMFLT:
       DumpNumber(fltvalue(o), D);
       break;
+#endif
     case LUA_TNUMINT:
       DumpInteger(ivalue(o), D);
       break;

@@ -23,7 +23,9 @@
 ** Hence even when the load factor reaches 100%, performance remains good.
 */
 
+#if !defined(LUA_NO_FLOAT)
 #include <math.h>
+#endif
 #include <limits.h>
 
 #include "lua.h"
@@ -82,6 +84,7 @@ static const Node dummynode_ = {
 };
 
 
+#if !defined(LUA_NO_FLOAT)
 /*
 ** Hash for floating-point numbers.
 ** The main computation should be just
@@ -110,6 +113,7 @@ static int l_hashfloat (lua_Number n) {
   }
 }
 #endif
+#endif
 
 
 /*
@@ -120,8 +124,10 @@ static Node *mainposition (const Table *t, const TValue *key) {
   switch (ttype(key)) {
     case LUA_TNUMINT:
       return hashint(t, ivalue(key));
+#if !defined(LUA_NO_FLOAT)
     case LUA_TNUMFLT:
       return hashmod(t, l_hashfloat(fltvalue(key)));
+#endif
     case LUA_TSHRSTR:
       return hashstr(t, tsvalue(key));
     case LUA_TLNGSTR:
@@ -441,8 +447,11 @@ static Node *getfreepos (Table *t) {
 */
 TValue *luaH_newkey (lua_State *L, Table *t, const TValue *key) {
   Node *mp;
+#if !defined(LUA_NO_FLOAT)
   TValue aux;
+#endif
   if (ttisnil(key)) luaG_runerror(L, "table index is nil");
+#if !defined(LUA_NO_FLOAT)
   else if (ttisfloat(key)) {
     lua_Integer k;
     if (luaV_tointeger(key, &k, 0)) {  /* index is int? */
@@ -452,6 +461,7 @@ TValue *luaH_newkey (lua_State *L, Table *t, const TValue *key) {
     else if (luai_numisnan(fltvalue(key)))
       luaG_runerror(L, "table index is NaN");
   }
+#endif
   mp = mainposition(t, key);
   if (!ttisnil(gval(mp)) || isdummy(mp)) {  /* main position is taken? */
     Node *othern;
@@ -572,12 +582,14 @@ const TValue *luaH_get (Table *t, const TValue *key) {
     case LUA_TSHRSTR: return luaH_getshortstr(t, tsvalue(key));
     case LUA_TNUMINT: return luaH_getint(t, ivalue(key));
     case LUA_TNIL: return luaO_nilobject;
+#if !defined(LUA_NO_FLOAT)
     case LUA_TNUMFLT: {
       lua_Integer k;
       if (luaV_tointeger(key, &k, 0)) /* index is int? */
         return luaH_getint(t, k);  /* use specialized version */
       /* else... */
     }  /* FALLTHROUGH */
+#endif
     default:
       return getgeneric(t, key);
   }

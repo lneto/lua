@@ -37,8 +37,12 @@
 #endif
 
 
+#if !defined(LUA_NO_FLOAT)
 #define tonumber(o,n) \
 	(ttisfloat(o) ? (*(n) = fltvalue(o), 1) : luaV_tonumber_(o,n))
+#else
+#define tonumber       tointeger
+#endif
 
 #define tointeger(o,i) \
     (ttisinteger(o) ? (*(i) = ivalue(o), 1) : luaV_tointeger(o,i,LUA_FLOORN2I))

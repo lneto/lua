@@ -43,9 +43,14 @@ LUALIB_API const char *(luaL_optlstring) (lua_State *L, int arg,
 LUALIB_API lua_Number (luaL_checknumber) (lua_State *L, int arg);
 LUALIB_API lua_Number (luaL_optnumber) (lua_State *L, int arg, lua_Number def);
 
+#if !defined(LUA_NO_FLOAT)
 LUALIB_API lua_Integer (luaL_checkinteger) (lua_State *L, int arg);
 LUALIB_API lua_Integer (luaL_optinteger) (lua_State *L, int arg,
                                           lua_Integer def);
+#else
+#define luaL_checkinteger		luaL_checknumber
+#define luaL_optinteger(L,a,d)	luaL_optnumber(L, (a), (lua_Number)(d))
+#endif
 
 LUALIB_API void (luaL_checkstack) (lua_State *L, int sz, const char *msg);
 LUALIB_API void (luaL_checktype) (lua_State *L, int arg, int t);

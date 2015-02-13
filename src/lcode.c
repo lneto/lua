@@ -10,7 +10,9 @@
 #include "lprefix.h"
 
 
+#if !defined(LUA_NO_FLOAT)
 #include <math.h>
+#endif
 #include <stdlib.h>
 
 #include "lua.h"
@@ -43,9 +45,11 @@ static int tonumeral(expdesc *e, TValue *v) {
     case VKINT:
       if (v) setivalue(v, e->u.ival);
       return 1;
+#if !defined(LUA_NO_FLOAT)
     case VKFLT:
       if (v) setfltvalue(v, e->u.nval);
       return 1;
+#endif
     default: return 0;
   }
 }
@@ -357,11 +361,13 @@ int luaK_intK (FuncState *fs, lua_Integer n) {
 }
 
 
+#if !defined(LUA_NO_FLOAT)
 static int luaK_numberK (FuncState *fs, lua_Number r) {
   TValue o;
   setfltvalue(&o, r);
   return addk(fs, &o, &o);
 }
+#endif
 
 
 static int boolK (FuncState *fs, int b) {
@@ -457,10 +463,12 @@ static void discharge2reg (FuncState *fs, expdesc *e, int reg) {
       luaK_codek(fs, reg, e->u.info);
       break;
     }
+#if !defined(LUA_NO_FLOAT)
     case VKFLT: {
       luaK_codek(fs, reg, luaK_numberK(fs, e->u.nval));
       break;
     }
+#endif
     case VKINT: {
       luaK_codek(fs, reg, luaK_intK(fs, e->u.ival));
       break;
@@ -571,11 +579,13 @@ int luaK_exp2RK (FuncState *fs, expdesc *e) {
       e->k = VK;
       goto vk;
     }
+#if !defined(LUA_NO_FLOAT)
     case VKFLT: {
       e->u.info = luaK_numberK(fs, e->u.nval);
       e->k = VK;
     }
     /* FALLTHROUGH */
+#endif
     case VK: {
      vk:
       if (e->u.info <= MAXINDEXRK)  /* constant fits in 'argC'? */
@@ -661,7 +671,11 @@ void luaK_goiftrue (FuncState *fs, expdesc *e) {
       pc = e->u.info;
       break;
     }
+#if !defined(LUA_NO_FLOAT)
     case VK: case VKFLT: case VKINT: case VTRUE: {
+#else
+    case VK: case VKINT: case VTRUE: {
+#endif
       pc = NO_JUMP;  /* always true; do nothing */
       break;
     }
@@ -706,7 +720,11 @@ static void codenot (FuncState *fs, expdesc *e) {
       e->k = VTRUE;
       break;
     }
+#if !defined(LUA_NO_FLOAT)
     case VK: case VKFLT: case VKINT: case VTRUE: {
+#else
+    case VK: case VKINT: case VTRUE: {
+#endif
       e->k = VFALSE;
       break;
     }
@@ -754,7 +772,11 @@ static int validop (int op, TValue *v1, TValue *v2) {
       lua_Integer i;
       return (tointeger(v1, &i) && tointeger(v2, &i));
     }
+#if !defined(LUA_NO_FLOAT)
     case LUA_OPDIV: case LUA_OPIDIV: case LUA_OPMOD:  /* division by 0 */
+#else
+    case LUA_OPIDIV: case LUA_OPMOD:  /* division by 0 */
+#endif
       return (nvalue(v2) != 0);
     default: return 1;  /* everything else is valid */
   }
@@ -774,11 +796,15 @@ static int constfolding (FuncState *fs, int op, expdesc *e1, expdesc *e2) {
     e1->u.ival = ivalue(&res);
   }
   else {  /* folds neither NaN nor 0.0 (to avoid collapsing with -0.0) */
+#if !defined(LUA_NO_FLOAT)
     lua_Number n = fltvalue(&res);
     if (luai_numisnan(n) || n == 0)
       return 0;
     e1->k = VKFLT;
     e1->u.nval = n;
+#else
+    return 0;  /* if it is not integer, we must fail */
+#endif
   }
   return 1;
 }
@@ -867,8 +893,13 @@ void luaK_infix (FuncState *fs, BinOpr op, expdesc *v) {
       break;
     }
     case OPR_ADD: case OPR_SUB:
+#if !defined(LUA_NO_FLOAT)
     case OPR_MUL: case OPR_DIV: case OPR_IDIV:
     case OPR_MOD: case OPR_POW:
+#else
+    case OPR_MUL: case OPR_IDIV:
+    case OPR_MOD:
+#endif
     case OPR_BAND: case OPR_BOR: case OPR_BXOR:
     case OPR_SHL: case OPR_SHR: {
       if (!tonumeral(v, NULL)) luaK_exp2RK(fs, v);
@@ -913,8 +944,13 @@ void luaK_posfix (FuncState *fs, BinOpr op,
       }
       break;
     }
+#if !defined(LUA_NO_FLOAT)
     case OPR_ADD: case OPR_SUB: case OPR_MUL: case OPR_DIV:
     case OPR_IDIV: case OPR_MOD: case OPR_POW:
+#else
+    case OPR_ADD: case OPR_SUB: case OPR_MUL:
+    case OPR_IDIV: case OPR_MOD:
+#endif
     case OPR_BAND: case OPR_BOR: case OPR_BXOR:
     case OPR_SHL: case OPR_SHR: {
       codeexpval(fs, cast(OpCode, (op - OPR_ADD) + OP_ADD), e1, e2, line);

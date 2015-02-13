@@ -26,8 +26,10 @@ typedef enum {
   TM_SUB,
   TM_MUL,
   TM_MOD,
+#if !defined(LUA_NO_FLOAT)
   TM_POW,
   TM_DIV,
+#endif
   TM_IDIV,
   TM_BAND,
   TM_BOR,

@@ -405,6 +405,7 @@ LUALIB_API lua_Number luaL_optnumber (lua_State *L, int arg, lua_Number def) {
 }
 
 
+#if !defined(LUA_NO_FLOAT)
 static void interror (lua_State *L, int arg) {
   if (lua_isnumber(L, arg))
     luaL_argerror(L, arg, "number has no integer representation");
@@ -427,6 +428,7 @@ LUALIB_API lua_Integer luaL_optinteger (lua_State *L, int arg,
                                                       lua_Integer def) {
   return luaL_opt(L, luaL_checkinteger, arg, def);
 }
+#endif
 
 /* }====================================================== */
 

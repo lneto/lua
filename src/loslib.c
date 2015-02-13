@@ -327,12 +327,14 @@ static int os_time (lua_State *L) {
 }
 
 
+#if !defined(LUA_NO_FLOAT)
 static int os_difftime (lua_State *L) {
   time_t t1 = l_checktime(L, 1);
   time_t t2 = l_checktime(L, 2);
   lua_pushnumber(L, (lua_Number)difftime(t1, t2));
   return 1;
 }
+#endif
 
 /* }====================================================== */
 
@@ -365,7 +367,9 @@ static int os_exit (lua_State *L) {
 static const luaL_Reg syslib[] = {
   {"clock",     os_clock},
   {"date",      os_date},
+#if !defined(LUA_NO_FLOAT)
   {"difftime",  os_difftime},
+#endif
   {"execute",   os_execute},
   {"exit",      os_exit},
   {"getenv",    os_getenv},

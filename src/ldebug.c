@@ -490,7 +490,11 @@ static const char *getfuncname (lua_State *L, CallInfo *ci, const char **name) {
       tm = TM_NEWINDEX;
       break;
     case OP_ADD: case OP_SUB: case OP_MUL: case OP_MOD:
+#if !defined(LUA_NO_FLOAT)
     case OP_POW: case OP_DIV: case OP_IDIV: case OP_BAND:
+#else
+    case OP_IDIV: case OP_BAND:
+#endif
     case OP_BOR: case OP_BXOR: case OP_SHL: case OP_SHR: {
       int offset = cast_int(GET_OPCODE(i)) - cast_int(OP_ADD);  /* ORDER OP */
       tm = cast(TMS, offset + cast_int(TM_ADD));  /* ORDER TM */

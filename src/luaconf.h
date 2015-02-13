@@ -402,6 +402,7 @@
 ** ===================================================================
 */
 
+#if !defined(LUA_NO_FLOAT)
 /*
 @@ LUA_NUMBER is the floating-point type used by Lua.
 @@ LUAI_UACNUMBER is the result of an 'usual argument conversion'
@@ -490,6 +491,7 @@
 #error "numeric float type not defined"
 
 #endif					/* } */
+#endif
 
 
 
@@ -761,7 +763,10 @@
 
 
 
+#define LUA_NUMBER		LUA_INTEGER
+#define LUA_NUMBER_FMT		LUA_INTEGER_FMT
 
+#define l_mathlim(n)		(0)
 
 #endif
 
