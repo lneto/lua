@@ -22,7 +22,9 @@ typedef enum {
   VTRUE,
   VFALSE,
   VK,		/* info = index of constant in 'k' */
+#ifndef _KERNEL
   VKFLT,	/* nval = numerical float value */
+#endif /* _KERNEL */
   VKINT,	/* nval = numerical integer value */
   VNONRELOC,	/* info = result register */
   VLOCAL,	/* info = local register */
@@ -47,7 +49,9 @@ typedef struct expdesc {
       lu_byte vt;  /* whether 't' is register (VLOCAL) or upvalue (VUPVAL) */
     } ind;
     int info;  /* for generic use */
+#ifndef _KERNEL
     lua_Number nval;  /* for VKFLT */
+#endif /* _KERNEL */
     lua_Integer ival;    /* for VKINT */
   } u;
   int t;  /* patch list of 'exit when true' */
